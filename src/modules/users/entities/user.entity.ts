@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn, 
   Column, 
   CreateDateColumn, 
-  UpdateDateColumn 
+  UpdateDateColumn, 
+  OneToMany
 } from 'typeorm';
+import { Post } from '../../posts/entities/post.entity';
 
 @Entity('users')
 export class User {
@@ -35,4 +37,7 @@ export class User {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts!: Post[];
 }
