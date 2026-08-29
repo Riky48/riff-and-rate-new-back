@@ -5,9 +5,11 @@ import {
   CreateDateColumn, 
   UpdateDateColumn, 
   ManyToOne, 
-  JoinColumn 
+  JoinColumn, 
+  OneToMany
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Rating } from './rating.entity';
 
 @Entity('posts')
 export class Post {
@@ -33,4 +35,8 @@ export class Post {
 
   @Column()
   userId!: number;
+
+  @OneToMany(() => Rating, (rating) => rating.post)
+  ratings!: Rating[];
+  
 }

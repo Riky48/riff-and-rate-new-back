@@ -4,9 +4,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { Post } from './entities/post.entity';
+import { Rating } from './entities/rating.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Post])], //  ACA REGISTRO LA ENTIDAD POST
+  imports: [TypeOrmModule.forFeature([Post, Rating])],
   controllers: [PostsController],
   providers: [PostsService],
   exports: [TypeOrmModule],
