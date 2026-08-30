@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { PostsService } from 
+import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { CreateRatingDto } from './dto/create-rating.dto';
 import { GetUser } from '../../common/decorators/get-user.decorator';
