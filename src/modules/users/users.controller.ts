@@ -1,26 +1,23 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+// src/modules/users/users.controller.ts
+import { Controller, Get, Patch, Body, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { GetUser } from '../../common/decorators/get-user.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt')) // Protege todas las rutas de este controlador
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // GET /users/me -> Devuelve el perfil del usuario autenticado
+  @UseGuards(JwtAuthGuard)
   @Get('me')
-  getProfile(@GetUser('id') userId: number) {
-    return this.usersService.findProfile(userId);
+  getProfile(@Req() req: any) {
+    return this.usersService.findProfile(req.user.id);
   }
 
-  // PATCH /users/me -> Actualiza la bio o ubicación del usuario
+  // OBLIGATORIO: Debe ir antes de @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   @Patch('me')
-  updateProfile(
-    @GetUser('id') userId: number,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    return this.usersService.updateProfile(userId, updateUserDto);
+  updateProfile(@Req() req: any, @Body() updateUserDto: UpdateUserDto) {
+    return this.usersService.updateProfile(req.user.id, updateUserDto);
   }
 }
