@@ -1,3 +1,4 @@
+// src/modules/posts/posts.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -12,22 +13,22 @@ export class PostsService {
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
     @InjectRepository(Rating)
-    private readonly ratingRepository: Repository<Rating>, // <-- Inyecto el repo de Rating
+    private readonly ratingRepository: Repository<Rating>,
   ) {}
 
   async create(createPostDto: CreatePostDto, userId: number) {
     const newPost = this.postRepository.create({
       ...createPostDto,
-      userId,
+      user: { id: userId },
     });
     return await this.postRepository.save(newPost);
   }
 
   async findAll() {
-    return await this.postRepository.find({
+    const posts = await this.postRepository.find({
       relations: {
         user: true,
-        ratings: true, // <-- Incluir los ratings de cada post
+        ratings: true,
       },
       select: {
         user: {
@@ -40,25 +41,33 @@ export class PostsService {
         createdAt: 'DESC',
       },
     });
+
+    // Mapeo dinámico para calcular el promedio de estrellas que consume el Frontend
+    return posts.map((post) => {
+      const totalRatings = post.ratings?.length || 0;
+      const sumaPuntuaciones = post.ratings?.reduce((acc, r) => acc + Number(r.puntuacion), 0) || 0;
+      const promedioRating = totalRatings > 0 ? Number((sumaPuntuaciones / totalRatings).toFixed(1)) : null;
+
+      return {
+        ...post,
+        promedioRating,
+      };
+    });
   }
 
   async ratePost(postId: number, userId: number, createRatingDto: CreateRatingDto) {
-    // 1. Verificar que la publicación exista
     const post = await this.postRepository.findOne({ where: { id: postId } });
     if (!post) {
       throw new NotFoundException('La publicación no existe');
     }
 
-    // 2. Buscar si el usuario ya votó esta publicación previamente
     let rating = await this.ratingRepository.findOne({
       where: { postId, userId },
     });
 
     if (rating) {
-      // Si ya existía voto, actualizamos el puntaje
       rating.puntuacion = createRatingDto.puntuacion;
     } else {
-      // Si es la primera vez, creamos el voto
       rating = this.ratingRepository.create({
         postId,
         userId,

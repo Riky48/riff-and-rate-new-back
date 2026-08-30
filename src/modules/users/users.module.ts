@@ -1,3 +1,4 @@
+// src/modules/users/users.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -6,7 +7,7 @@ import { UsersService } from './users.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User])],
-  controllers: [UsersController],
+  controllers: [UsersController], // <-- OBLIGATORIO para registrar /users/me
   providers: [UsersService],
   exports: [UsersService, TypeOrmModule],
 })
