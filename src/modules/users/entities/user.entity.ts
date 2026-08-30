@@ -31,6 +31,12 @@ export class User {
   bio: string;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
+  actividad: string;
+
+  @Column({ type: 'simple-array', nullable: true })
+  bandas: string[];
+
+  @Column({ type: 'varchar', length: 100, nullable: true })
   ubicacion: string;
 
   @CreateDateColumn()
