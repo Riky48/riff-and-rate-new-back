@@ -8,6 +8,7 @@ import {
   OneToMany
 } from 'typeorm';
 import { Post } from '../../posts/entities/post.entity';
+import { Product } from '../../products/entities/product.entity';
 
 @Entity('users')
 export class User {
@@ -40,4 +41,7 @@ export class User {
 
   @OneToMany(() => Post, (post) => post.user)
   posts!: Post[];
+
+  @OneToMany(() => Product, (product) => product.user)
+products!: Product[];
 }
