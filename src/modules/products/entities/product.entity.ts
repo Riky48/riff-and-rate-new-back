@@ -20,8 +20,16 @@ export class Product {
   @Column({ type: 'text' })
   descripcion!: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  precio!: number;
+  @Column({
+  type: 'decimal',
+  precision: 10,
+  scale: 2,
+  transformer: {
+    to: (value: number) => value,
+    from: (value: string) => parseFloat(value) // ¡Mapea de string decimal a número de JS!
+  }
+})
+precio!: number;
 
   @Column({ type: 'varchar', length: 50, default: 'Usado' })
   condicion!: string; // 'Nuevo' o 'Usado'

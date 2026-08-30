@@ -24,23 +24,41 @@ export class PostsService {
   }
 
   async findAll() {
-    return await this.postRepository.find({
-      relations: {
-        user: true,
-        ratings: true, // <-- Incluir los ratings de cada post
+  // 1. Buscamos los posts en MySQL incluyendo sus calificaciones individuales
+  const posts = await this.postRepository.find({
+    relations: {
+      user: true,
+      ratings: true,
+    },
+    select: {
+      user: {
+        id: true,
+        nombre: true,
+        rol: true,
       },
-      select: {
-        user: {
-          id: true,
-          nombre: true,
-          rol: true,
-        },
-      },
-      order: {
-        createdAt: 'DESC',
-      },
-    });
-  }
+    },
+    order: {
+      createdAt: 'DESC',
+    },
+  });
+
+  // 2. Recorremos cada post y calculamos su promedio de estrellas en el aire
+  return posts.map(post => {
+    const totalRatings = post.ratings?.length || 0;
+    const sumaRatings = post.ratings?.reduce((sum, r) => sum + r.puntuacion, 0) || 0;
+    
+    // Si tiene calificaciones saca el promedio con 1 decimal (ej: 4.5), si no, queda en 0.
+    const promedioRating = totalRatings > 0 
+      ? Number((sumaRatings / totalRatings).toFixed(1)) 
+      : 0;
+
+    // 3. Devolvemos el post e inyectamos la propiedad "promedioRating" para el Frontend
+    return {
+      ...post,
+      promedioRating, 
+    };
+  });
+}
 
   async ratePost(postId: number, userId: number, createRatingDto: CreateRatingDto) {
     // 1. Verificar que la publicación exista
@@ -51,7 +69,7 @@ export class PostsService {
 
     // 2. Buscar si el usuario ya votó esta publicación previamente
     let rating = await this.ratingRepository.findOne({
-      where: { postId, userId },
+      where: { userId, postId },
     });
 
     if (rating) {
@@ -60,8 +78,8 @@ export class PostsService {
     } else {
       // Si es la primera vez, creamos el voto
       rating = this.ratingRepository.create({
-        postId,
         userId,
+       postId,
         puntuacion: createRatingDto.puntuacion,
       });
     }

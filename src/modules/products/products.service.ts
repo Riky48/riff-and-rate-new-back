@@ -21,47 +21,39 @@ export class ProductsService {
   }
 
   async findAll(filterDto: GetProductsFilterDto) {
-    const { categoria, minPrecio, maxPrecio, buscar } = filterDto;
+  const { categoria, minPrecio, maxPrecio, buscar } = filterDto;
+  const query = this.productRepository.createQueryBuilder('product')
+    .leftJoinAndSelect('product.user', 'user')
+    .select([
+      'product',
+      'user.id',
+      'user.nombre',
+      'user.email',
+      'user.ubicacion',
+    ]);
 
-    // Inicia la construcción de la consulta SQL
-    const query = this.productRepository.createQueryBuilder('product')
-      .leftJoinAndSelect('product.user', 'user')
-      .select([
-        'product',
-        'user.id',
-        'user.nombre',
-        'user.email',
-        'user.ubicacion',
-      ]);
-
-    // Filtro por categoría exacto
-    if (categoria) {
-      query.andWhere('product.categoria = :categoria', { categoria });
-    }
-
-    // Filtro por precio mínimo (Rango)
-    if (minPrecio !== undefined) {
-      query.andWhere('product.precio >= :minPrecio', { minPrecio });
-    }
-
-    // Filtro por precio máximo (Rango)
-    if (maxPrecio !== undefined) {
-      query.andWhere('product.precio <= :maxPrecio', { maxPrecio });
-    }
-
-    // Búsqueda por coincidencia parcial (LIKE) en título o descripción
-    if (buscar) {
-      query.andWhere(
-        '(LOWER(product.titulo) LIKE LOWER(:buscar) OR LOWER(product.descripcion) LIKE LOWER(:buscar))',
-        { buscar: `%${buscar}%` },
-      );
-    }
-
-    // Ordenar siempre por publicaciones más recientes
-    query.orderBy('product.createdAt', 'DESC');
-
-    return await query.getMany();
+  if (categoria) {
+    query.andWhere('product.categoria = :categoria', { categoria });
   }
+
+  if (minPrecio) {
+    query.andWhere('product.precio >= :minPrecio', { minPrecio });
+  }
+
+  if (maxPrecio) {
+    query.andWhere('product.precio <= :maxPrecio', { maxPrecio });
+  }
+
+  if (buscar) {
+    query.andWhere(
+      '(product.titulo LIKE :buscar OR product.descripcion LIKE :buscar)',
+      { buscar: `%${buscar}%` }
+    );
+  }
+
+  query.orderBy('product.createdAt', 'DESC');
+  return await query.getMany();
+}
 
   async findOne(id: number) {
     const product = await this.productRepository.findOne({

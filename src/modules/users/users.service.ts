@@ -26,6 +26,8 @@ export class UsersService {
         rol: true,
         bio: true,
         ubicacion: true,
+        actividad: true,
+        bandas: true,
         createdAt: true,
       },
     });
@@ -36,12 +38,15 @@ export class UsersService {
 
   // Actualizar datos del perfil
   async updateProfile(userId: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.preload({
-      id: userId,
-      ...updateUserDto,
-    });
+  const user = await this.userRepository.preload({
+    id: userId,
+    ...updateUserDto,
+  });
 
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    return await this.userRepository.save(user);
+  if (!user) {
+    throw new NotFoundException('Usuario no encontrado');
   }
+
+  return await this.userRepository.save(user); // ¡Guardado explícito agregado!
+}
 }
