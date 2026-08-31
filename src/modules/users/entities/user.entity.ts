@@ -39,6 +39,12 @@ export class User {
   @Column({ type: 'varchar', length: 100, nullable: true })
   ubicacion: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  fotoPerfil: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  banner: string;
+
   @CreateDateColumn()
   createdAt: Date;
 
@@ -50,4 +56,5 @@ export class User {
 
   @OneToMany(() => Product, (product) => product.user)
 products!: Product[];
+
 }

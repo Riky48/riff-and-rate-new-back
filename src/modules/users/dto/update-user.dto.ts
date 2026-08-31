@@ -24,4 +24,12 @@ export class UpdateUserDto {
   @IsString({ each: true })
   @IsOptional()
   bandas?: string[];
+
+  @IsOptional()
+  @IsString()
+  fotoPerfil?: string; // 
+
+  @IsOptional()
+  @IsString()
+  banner?: string; // 
 }
